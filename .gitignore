@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+*.env
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Atmel Studio / AVR build artifacts
+Debug/
+Release/
+*.elf
+*.hex
+*.map
+*.lss
+*.eep
+*.srec
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Office temp files
+~$*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,418 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   style.css — Tema oscuro inspirado en instrumentos de medición electrónica
+
+   Paleta:
+     Fondo principal : #0d1117  (negro github)
+     Panel           : #161b22  (gris oscuro)
+     Inputs          : #21262d  (gris medio)
+     Bordes          : #30363d
+     Texto principal : #c9d1d9
+     Texto atenuado  : #8b949e
+     Acento cian     : #00d4ff  (indicadores, sliders, bordes activos)
+     Verde           : #39d353  (estado OK, log)
+     Amarillo        : #d29922  (advertencia, DCM)
+     Rojo            : #f85149  (error, fault, desconectado)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg-main:    #0d1117;
+    --bg-panel:   #161b22;
+    --bg-input:   #21262d;
+    --border:     #30363d;
+    --text:       #c9d1d9;
+    --text-dim:   #8b949e;
+    --accent:     #00d4ff;
+    --green:      #39d353;
+    --yellow:     #d29922;
+    --red:        #f85149;
+    --radius-sm:  4px;
+    --radius-md:  8px;
+    --radius-lg:  12px;
+    --transition: 0.18s ease;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    min-height: 100vh;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────── */
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-icon {
+    font-size: 20px;
+    color: var(--accent);
+}
+
+h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.3px;
+}
+
+/* Badge de estado de conexión en el header */
+.badge {
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.badge-connected {
+    background: rgba(57, 211, 83, 0.12);
+    color: var(--green);
+    border: 1px solid var(--green);
+}
+
+.badge-disconnected {
+    background: rgba(248, 81, 73, 0.12);
+    color: var(--red);
+    border: 1px solid var(--red);
+}
+
+/* ── GRID PRINCIPAL ──────────────────────────────────────────────────── */
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 270px 1fr 1fr;
+    gap: 14px;
+    padding: 14px;
+    min-height: calc(100vh - 50px);
+}
+
+/* Responsive: tablet */
+@media (max-width: 1024px) {
+    .grid-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    #panel-conexion { grid-column: 1 / -1; }
+}
+
+/* Responsive: móvil */
+@media (max-width: 640px) {
+    .grid-container { grid-template-columns: 1fr; }
+}
+
+/* ── PANEL ───────────────────────────────────────────────────────────── */
+
+.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow: hidden;
+}
+
+.panel h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+}
+
+.panel h3 {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+}
+
+.chart-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: -8px;
+}
+
+/* ── FORMULARIOS ─────────────────────────────────────────────────────── */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 13px;
+    width: 100%;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b949e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
+}
+
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.input-row input { flex: 1; }
+.unit { color: var(--text-dim); font-size: 12px; font-weight: 500; min-width: 14px; }
+
+/* ── SLIDER ──────────────────────────────────────────────────────────── */
+
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--bg-input);
+    outline: none;
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 2px solid var(--bg-main);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+    transition: transform var(--transition);
+}
+
+.slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.slider::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--bg-main);
+    cursor: pointer;
+}
+
+/* ── BOTONES ─────────────────────────────────────────────────────────── */
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity var(--transition), transform 0.1s, box-shadow var(--transition);
+    flex: 1;
+    min-width: 80px;
+    letter-spacing: 0.2px;
+}
+
+.btn:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.btn:active:not(:disabled) { transform: translateY(0); box-shadow: none; }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-primary { background: var(--accent);  color: #000; }
+.btn-danger  { background: var(--red);     color: #fff; }
+.btn-warning { background: var(--yellow);  color: #000; }
+
+/* ── GRID DE INFO DE CONEXIÓN ────────────────────────────────────────── */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 16px;
+    font-size: 12px;
+}
+
+.info-label { color: var(--text-dim); }
+.info-value { color: var(--text); font-weight: 500; }
+
+/* ── ALERTAS Y FEEDBACK ──────────────────────────────────────────────── */
+
+.alert {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.alert-error   { background: rgba(248,81,73,0.12); color: var(--red);    border: 1px solid rgba(248,81,73,0.3); }
+.alert-success { background: rgba(57,211,83,0.12); color: var(--green);  border: 1px solid rgba(57,211,83,0.3); }
+.alert-warning { background: rgba(210,153,34,0.12); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+
+/* ── LOG DE COMANDOS ─────────────────────────────────────────────────── */
+
+.log-box {
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    height: 160px;
+    overflow-y: auto;
+    font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+    font-size: 10.5px;
+    color: var(--green);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.log-box::-webkit-scrollbar { width: 5px; }
+.log-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.log-entry { white-space: pre-wrap; word-break: break-all; }
+
+/* ── MEDIDORES DIGITALES ─────────────────────────────────────────────── */
+
+.meters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.meter-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    text-align: center;
+    transition: border-color var(--transition);
+}
+
+.status-card { grid-column: 1 / -1; }
+
+.meter-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.meter-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
+    transition: color var(--transition);
+}
+
+.meter-value.accent { color: var(--accent); }
+
+/* Colores semánticos del estado del sistema */
+.status-ok       { color: var(--green)  !important; }
+.status-fault    { color: var(--red)    !important; }
+.status-dcm      { color: var(--yellow) !important; }
+.status-unknown  { color: var(--text-dim) !important; }
+
+/* ── GRÁFICAS ─────────────────────────────────────────────────────────── */
+
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.chart-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+    padding-left: 4px;
+}
+
+.chart-container {
+    position: relative;
+    height: 190px;
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px;
+}
+
+/* ── CHECKBOX ─────────────────────────────────────────────────────────── */
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 13px;
+    user-select: none;
+}
+
+input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    accent-color: var(--accent);
+}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buck Converter Controller</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!--
+        Chart.js v4: librería de gráficas para el historial de telemetría.
+        Usamos CDN para evitar instalación adicional. Produce gráficas de línea
+        con animaciones deshabilitadas (animation: false) para updates en tiempo real.
+        Documentación: https://www.chartjs.org/docs/latest/
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!--
+        Socket.IO client v4: DEBE coincidir con la versión del servidor (flask-socketio 5.x usa socket.io 4.x).
+        Gestiona la conexión WebSocket con reconexión automática y fallback a long-polling.
+        Documentación: https://socket.io/docs/v4/client-api/
+    -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <span class="header-icon">&#9889;</span>
+        <h1>Buck Converter Controller</h1>
+    </div>
+    <div id="status-badge" class="badge badge-disconnected">DESCONECTADO</div>
+</header>
+
+<main class="grid-container">
+
+    <!-- ════════════════════════════════════════════════════════
+         PANEL 1: CONEXIÓN
+         ════════════════════════════════════════════════════════ -->
+    <section class="panel" id="panel-conexion">
+        <h2>Conexión HC-05</h2>
+
+        <div class="form-group">
+            <label for="port-input">Puerto serial</label>
+            <input type="text" id="port-input" value="COM3"
+                   placeholder="COM3 · /dev/rfcomm0">
+        </div>
+
+        <div class="form-group">
+            <label for="baud-input">Velocidad (baudios)</label>
+            <select id="baud-input">
+                <option value="9600" selected>9600</option>
+                <option value="19200">19200</option>
+                <option value="38400">38400</option>
+                <option value="115200">115200</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-label" for="mock-check">
+                <input type="checkbox" id="mock-check">
+                Modo simulación (sin hardware)
+            </label>
+        </div>
+
+        <div class="button-group">
+            <button id="btn-connect" class="btn btn-primary">Conectar</button>
+            <button id="btn-disconnect" class="btn btn-danger" disabled>Desconectar</button>
+        </div>
+
+        <div class="info-grid">
+            <span class="info-label">Puerto</span>
+            <span id="display-port" class="info-value">—</span>
+            <span class="info-label">Estado</span>
+            <span id="display-conn-status" class="info-value">Sin conexión</span>
+        </div>
+
+        <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+
+        <h3>Log de comandos</h3>
+        <div id="command-log" class="log-box" aria-live="polite" aria-label="Log de comandos TX/RX"></div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════
+         PANEL 2: CONTROL
+         ════════════════════════════════════════════════════════ -->
+    <section class="panel" id="panel-control">
+        <h2>Control de Voltaje</h2>
+
+        <!-- Slider principal -->
+        <div class="form-group">
+            <label for="voltage-slider">
+                Setpoint: <strong id="slider-display">0.0</strong> V
+            </label>
+            <input type="range" id="voltage-slider"
+                   min="0" max="9" step="0.1" value="0"
+                   class="slider" aria-label="Setpoint de voltaje">
+        </div>
+
+        <!-- Entrada numérica alternativa -->
+        <div class="form-group">
+            <label for="voltage-input">Valor manual (0 – 9 V)</label>
+            <div class="input-row">
+                <input type="number" id="voltage-input"
+                       min="0" max="9" step="0.1" value="0.0"
+                       aria-label="Setpoint numérico">
+                <span class="unit">V</span>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="btn-apply" class="btn btn-primary" disabled>
+                Aplicar setpoint
+            </button>
+            <button id="btn-reset" class="btn btn-warning" disabled>
+                Reset faltas
+            </button>
+        </div>
+
+        <div id="setpoint-feedback" class="alert" style="display:none;"></div>
+
+        <!-- Medidores digitales en tiempo real -->
+        <div class="meters-grid">
+            <div class="meter-card">
+                <div class="meter-label">V_out</div>
+                <div class="meter-value" id="meter-vout">— V</div>
+            </div>
+            <div class="meter-card">
+                <div class="meter-label">I_out</div>
+                <div class="meter-value" id="meter-iout">— A</div>
+            </div>
+            <div class="meter-card">
+                <div class="meter-label">Setpoint</div>
+                <div class="meter-value accent" id="meter-setpoint">0.0 V</div>
+            </div>
+            <div class="meter-card status-card">
+                <div class="meter-label">Estado del sistema</div>
+                <div class="meter-value" id="meter-status">—</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════
+         PANEL 3: TELEMETRÍA (gráficas)
+         ════════════════════════════════════════════════════════ -->
+    <section class="panel" id="panel-telemetria">
+        <h2>Telemetría en tiempo real</h2>
+        <p class="chart-subtitle">Últimos 60 segundos · Actualización 500 ms</p>
+
+        <div class="chart-wrapper">
+            <div class="chart-label">Voltaje de salida (V)</div>
+            <div class="chart-container">
+                <canvas id="chart-vout" aria-label="Gráfica de voltaje de salida"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <div class="chart-label">Corriente de salida (A)</div>
+            <div class="chart-container">
+                <canvas id="chart-iout" aria-label="Gráfica de corriente de salida"></canvas>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
